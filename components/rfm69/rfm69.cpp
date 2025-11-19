@@ -139,12 +139,12 @@ void RFM69Component::write_register_(uint8_t addr, uint8_t value) {
 
 uint8_t RFM69Component::burst_read_register_(uint8_t addr, uint8_t *buffer, uint8_t len) {
     this->enable();
-    uint8_t status = this->write_byte(addr & RFM69_READ_REGISTER);
+    this->write_byte(addr & RFM69_READ_REGISTER);
     for (uint8_t i = 0; i < len; i++) {
         buffer[i] = this->read_byte();
     }
     this->disable();
-    return status;
+    return 0;
 }
 
 void RFM69Component::burst_write_register_(uint8_t addr, const uint8_t *buffer, uint8_t len) {
