@@ -8,7 +8,11 @@
 #endif
 
 // Для тестування використовуємо mock SPI, для ESPHome - звичайний
+#ifdef ARDUINO
+#include <SPI.h>
+#else
 #include "esphome/components/spi/spi.h"
+#endif
 
 #include <string>
 #include <memory>
