@@ -1,0 +1,36 @@
+esphome:
+  name: rfm69-test
+  platform: ESP32
+  board: esp32dev
+
+wifi:
+  ssid: "YourSSID"
+  password: "YourPassword"
+
+logger:
+
+api:
+
+ota:
+
+spi:
+  clk_pin: GPIO18
+  miso_pin: GPIO19
+  mosi_pin: GPIO23
+
+# Підключення вашого компонента локально
+external_components:
+  - source:
+      type: local
+      path: components
+    components: [ rfm69 ]
+
+rfm69:
+  cs_pin: GPIO5
+  irq_pin: GPIO4
+  rst_pin: GPIO2
+  frequency: 868.0
+  network_id: 100
+  node_id: 1
+  high_power: true
+  power_level: 20

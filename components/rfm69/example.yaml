@@ -1,0 +1,40 @@
+esphome:
+  name: rfm69-test
+  platform: ESP32
+  board: esp32dev
+
+wifi:
+  ssid: "YOUR_WIFI"
+  password: "YOUR_PASSWORD"
+
+logger:
+api:
+ota:
+
+external_components:
+  - source: github://redacid/esphome-rfm69@main
+    components: [ rfm69 ]
+
+spi:
+  clk_pin: GPIO18
+  miso_pin: GPIO19
+  mosi_pin: GPIO23
+
+rfm69:
+  cs_pin: GPIO5
+  irq_pin: GPIO4
+  rst_pin: GPIO2
+  frequency: 868.0
+  network_id: 100
+  node_id: 1
+  high_power: true
+  power_level: 20
+
+# Приклад відправки через кнопку
+button:
+  - platform: template
+    name: "Send RFM69 Test"
+    on_press:
+      - lambda: |-
+          auto rfm = id(rfm69_component);  // потрібно додати ID
+          rfm->send_message(2, "Hello World!");
