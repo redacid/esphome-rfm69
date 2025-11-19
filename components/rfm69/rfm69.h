@@ -101,7 +101,7 @@ struct __attribute__((packed)) RFM69Packet {
     RFM69RSSI rssi;
 };
 
-class RFM69Component : public Component {
+class RFM69Component : public Component, public spi::SPIDevice<spi::BIT_ORDER_MSB_FIRST, spi::CLOCK_POLARITY_LOW, spi::CLOCK_PHASE_LEADING, spi::DATA_RATE_1MHZ> {
  public:
   void setup() override;
   void loop() override;
@@ -110,10 +110,6 @@ class RFM69Component : public Component {
   float get_setup_priority() const override { return setup_priority::DATA; }
 
   // Configuration methods
-  void set_cs_pin(std::shared_ptr<GPIOPin> cs_pin) { this->cs_pin_ = cs_pin; }
-  void set_irq_pin(std::shared_ptr<GPIOPin> irq_pin) { this->irq_pin_ = irq_pin; }
-  void set_rst_pin(std::shared_ptr<GPIOPin> rst_pin) { this->rst_pin_ = rst_pin; }
-
   void set_frequency(float frequency) { this->frequency_ = frequency; }
   void set_network_id(uint8_t network_id) { this->network_id_ = network_id; }
   void set_node_id(uint8_t node_id) { this->node_id_ = node_id; }
@@ -203,11 +199,6 @@ class RFM69Component : public Component {
   }
 
  private:
-  // GPIO pins
-  std::shared_ptr<GPIOPin> cs_pin_;
-  std::shared_ptr<GPIOPin> irq_pin_;
-  std::shared_ptr<GPIOPin> rst_pin_;
-
   // Configuration
   float frequency_{868.0};
   uint8_t network_id_{100};

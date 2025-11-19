@@ -1,6 +1,5 @@
 #include "rfm69.h"
 #include "rfm69_registers.h"
-#include "esphome/components/spi/spi.h"
 
 #ifdef ESPHOME_LOG_HAS_CONFIG
 #include "esphome/core/log.h"
@@ -31,35 +30,12 @@ static const uint8_t RFM69_MODEM_CONFIG[] = {
 void RFM69Component::setup() {
     ESP_LOGCONFIG(TAG, "Setting up RFM69...");
 
-    // Initialize GPIO pins
-    this->cs_pin_->setup();
-    this->cs_pin_->digital_write(true);
-
-    this->irq_pin_->setup();
-
-    if (this->rst_pin_ != nullptr) {
-        this->rst_pin_->setup();
-        // Reset module
-        this->rst_pin_->digital_write(true);
-        delay(100);
-        this->rst_pin_->digital_write(false);
-        delay(100);
-    }
-
-    // Initialize SPI
-    //SPI.begin();
-	this->spi_setup();
-
     // Initialize radio
     if (!this->initialize_()) {
         ESP_LOGE(TAG, "Failed to initialize RFM69");
         this->mark_failed();
         return;
     }
-
-    // Setup interrupt
-    // Note: In real ESPHome, you would use attachInterrupt with proper pin and ISR
-    // For now, we'll handle interrupts in the loop
 
     ESP_LOGCONFIG(TAG, "RFM69 setup complete");
 }
@@ -147,37 +123,37 @@ bool RFM69Component::sanity_check_() {
 }
 
 uint8_t RFM69Component::read_register_(uint8_t addr) {
-    this->cs_pin_->digital_write(false);
-    SPI.transfer(addr & RFM69_READ_REGISTER);
-    uint8_t value = SPI.transfer(0);
-    this->cs_pin_->digital_write(true);
+    this->enable();
+    this->write_byte(addr & RFM69_READ_REGISTER);
+    uint8_t value = this->read_byte();
+    this->disable();
     return value;
 }
 
 void RFM69Component::write_register_(uint8_t addr, uint8_t value) {
-    this->cs_pin_->digital_write(false);
-    SPI.transfer(addr | RFM69_WRITE_REGISTER);
-    SPI.transfer(value);
-    this->cs_pin_->digital_write(true);
+    this->enable();
+    this->write_byte(addr | RFM69_WRITE_REGISTER);
+    this->write_byte(value);
+    this->disable();
 }
 
 uint8_t RFM69Component::burst_read_register_(uint8_t addr, uint8_t *buffer, uint8_t len) {
-    this->cs_pin_->digital_write(false);
-    uint8_t status = SPI.transfer(addr & RFM69_READ_REGISTER);
+    this->enable();
+    uint8_t status = this->write_byte(addr & RFM69_READ_REGISTER);
     for (uint8_t i = 0; i < len; i++) {
-        buffer[i] = SPI.transfer(0);
+        buffer[i] = this->read_byte();
     }
-    this->cs_pin_->digital_write(true);
+    this->disable();
     return status;
 }
 
 void RFM69Component::burst_write_register_(uint8_t addr, const uint8_t *buffer, uint8_t len) {
-    this->cs_pin_->digital_write(false);
-    SPI.transfer(addr | RFM69_WRITE_REGISTER);
+    this->enable();
+    this->write_byte(addr | RFM69_WRITE_REGISTER);
     for (uint8_t i = 0; i < len; i++) {
-        SPI.transfer(buffer[i]);
+        this->write_byte(buffer[i]);
     }
-    this->cs_pin_->digital_write(true);
+    this->disable();
 }
 
 bool RFM69Component::set_radio_mode(RFM69RadioMode new_mode) {
@@ -529,11 +505,11 @@ void RFM69Component::handle_interrupt_() {
             bool header_read = false;
             uint8_t reading_length = sizeof(RFM69Header);
 
-            this->cs_pin_->digital_write(false);
-            SPI.transfer(RFM69_REG_FIFO & RFM69_READ_REGISTER);
+            this->enable();
+            this->write_byte(RFM69_REG_FIFO & RFM69_READ_REGISTER);
 
             while (reading_length--) {
-                *current++ = SPI.transfer(0);
+                *current++ = this->read_byte();
 
                 if (!reading_length && !header_read) {
                     header_read = true;
@@ -548,7 +524,7 @@ void RFM69Component::handle_interrupt_() {
                 }
             }
 
-            this->cs_pin_->digital_write(true);
+            this->disable();
         }
 
         this->current_packet_.rssi = this->read_rssi_();
