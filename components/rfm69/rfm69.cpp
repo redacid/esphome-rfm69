@@ -1,5 +1,6 @@
 #include "rfm69.h"
 #include "rfm69_registers.h"
+#include "esphome/components/spi/spi.h"
 
 #ifdef ESPHOME_LOG_HAS_CONFIG
 #include "esphome/core/log.h"
@@ -46,7 +47,8 @@ void RFM69Component::setup() {
     }
 
     // Initialize SPI
-    SPI.begin();
+    //SPI.begin();
+	this->spi_setup();
 
     // Initialize radio
     if (!this->initialize_()) {

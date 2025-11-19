@@ -2,16 +2,9 @@
 
 #include "esphome/core/component.h"
 #include "esphome/core/hal.h"
-
+#include "esphome/components/spi/spi.h"
 #ifdef ESPHOME_LOG_HAS_CONFIG
 #include "esphome/core/log.h"
-#endif
-
-// Для тестування використовуємо mock SPI, для ESPHome - звичайний
-#ifdef ARDUINO
-#include <SPI.h>
-#else
-#include "esphome/components/spi/spi.h"
 #endif
 
 #include <string>

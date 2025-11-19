@@ -9,12 +9,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # Шляхи до заголовкових файлів
 include_directories(
         ${CMAKE_CURRENT_SOURCE_DIR}/../components/rfm69
-        ${CMAKE_CURRENT_SOURCE_DIR}/mock_esphome
-)
-
-# Додаємо mock SPI source
-add_library(mock_spi
-        mock_esphome/esphome/components/spi/spi.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/esphome_headers
 )
 
 # Створюємо виконуваний файл для тестування
@@ -23,5 +18,7 @@ add_executable(rfm69_test
         ../components/rfm69/rfm69.cpp
 )
 
-# Лінкуємо mock бібліотеки
-target_link_libraries(rfm69_test mock_spi)
+# Додаємо компіляційні визначення
+target_compile_definitions(rfm69_test PRIVATE
+        ESPHOME_LOG_HAS_CONFIG
+)
