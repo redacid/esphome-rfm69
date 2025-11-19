@@ -21,6 +21,7 @@ spi:
   mosi_pin: GPIO23
 
 rfm69:
+  id: rfm69_component
   cs_pin: GPIO5
   irq_pin: GPIO4
   rst_pin: GPIO2
